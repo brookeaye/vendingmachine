@@ -46,30 +46,161 @@
 package vendingMachine;
 
 
-import java.lang.Math;
+import java.util.Scanner;
 
 
 public class Model {
 	//Define fields (all instance variables)
-	
-	private View view;         // Model must tell View when to update itself
-	
-	private int    cokeLeft;
-	private int    pepsiLeft;
-	
-	private int    quartersLeft, dimesLeft, nickelsLeft;
-	
-	//I defined about 10 more fields
-	
-	//Define constructor
-	
+	private int cokeLeft;
+	private int pepsiLeft;
+	private int cokeCost;
+	private int pepsiCost;
+	View view;
+	private int deposit;
+	private int dimesLeft;
+	private int quartersLeft;
+	private int nickelsLeft;
+    private int quartersDeposited = 0;
+    private int nickelsDeposited = 0;
+    private int dimesDeposited = 0;
+	String message = "";
+	public Model(){
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter quarters. \t to start(10)");
+        try{
+            quartersLeft = scanner.nextInt();
+        }
+        catch (Exception e){
+            quartersLeft = 10;
+        }
+		System.out.println("Enter dimes. \t to start(10)");
+        try{
+            dimesLeft = scanner.nextInt();
+        }
+        catch (Exception e){
+            dimesLeft = 10;
+        }
+        System.out.println("Enter nickels. \t to start(10)");
+        try{
+            nickelsLeft = scanner.nextInt();
+        }
+        catch (Exception e){
+            nickelsLeft = 10;
+        }
+		System.out.println("Enter pepsi cost in cents(85)");
+        try{
+            pepsiCost = scanner.nextInt();
+        }
+        catch (Exception e){
+            pepsiCost = 85;
+        }
+		System.out.println("Enter coke cost in cents (95)");
+        try{
+            cokeCost = scanner.nextInt();
+        }
+        catch (Exception e){
+            cokeCost = 85;
+        }
+		System.out.println("Enter coke \t to start(5)");
+        try{
+            cokeLeft = scanner.nextInt();
+        }
+        catch (Exception e){
+            cokeLeft = 5;
+        }
+		System.out.println("Enter pepsi \t to start(5)");
+        try{
+            pepsiLeft = scanner.nextInt();
+        }
+        catch (Exception e){
+            pepsiLeft = 5;
+        }
+	}
+	public void deposit(int amount){
+        deposit+=amount;
+        if (amount == 5){
+            nickelsDeposited++;
+            nickelsLeft++;
+        }
+        if (amount == 10){
+            dimesDeposited++;
+            dimesLeft++;
+        }
+        if (amount == 25){
+            quartersDeposited++;
+            quartersLeft++;
+        }
+        message = amount + " cents added.";
+        view.update();
+	}
+
+	public String getDeposited(){
+		return String.valueOf(deposit);
+	}
+
+	public void buy(String product){
+		if (product.equals("Coke")){
+            if (deposit < cokeCost){
+                message = "Deposit more money.";
+            }
+            else{
+                message = "Coke bought. Change: " + getChange(deposit-cokeCost);
+                cokeLeft--;
+                deposit = 0;
+            }
+        }
+        if (product.equals("Pepsi")){
+            if (deposit < pepsiCost){
+                message = "Deposit more money.";
+            }
+            else{
+                message = "Pepsi bought. Change: " + getChange(deposit-pepsiCost);
+                pepsiLeft--;
+                deposit = 0;
+            }
+        }
+        view.update();
+	}
+
+    public void cancel(){
+        quartersLeft -= quartersDeposited;
+        nickelsLeft -= nickelsDeposited;
+        dimesLeft -= dimesDeposited;
+        quartersDeposited = 0;
+        nickelsDeposited = 0;
+        dimesDeposited = 0;
+        deposit = 0;
+        message = "deposit cancelled.";
+        view.update();
+    }
+	private View view(){
+        return view;
+	}        // Model must tell View when to update itself
+
+	public int  getCokeLeft(){
+		return cokeLeft;
+	}
+	public int  getPepsiLeft(){
+		return pepsiLeft;
+	}
+
+	public String getMessage(){
+		return message;
+	}
+
+	public String getCokePrice(){
+		return "" + cokeCost;
+	}
+
+	public String getPepsiPrice(){
+		return "" + pepsiCost;
+	}
+
+
 	//Refer to the view (used to call update after each button press)
 	public void addView(View v)
 	{view = v;}
-	
-	//Define required methods: mutators (setters) and accessors (getters)
-	
-	//Represent "interesting" state of vending machine
+
 	public String toString()
 	{
 		return "Vending Machine State: \n" +
@@ -82,5 +213,35 @@ public class Model {
 	}
 	
 	//Define helper methods
+    private String getChange(int n){
+        int quarterNum = 0;
+        int dimeNum = 0;
+        int nickelNum = 0;
+        String toReturn = "";
+        while (n > 0){
+            if (n >= 25 && quartersLeft > 0){
+                quarterNum++;
+                n-=25;
+            }
+            else if (n >=10 && dimesLeft > 0){
+                dimeNum++;
+                n-=10;
+            }
+            else{
+                nickelNum++;
+                n-=5;
+            }
+        }
+        if (quarterNum > 0){
+            toReturn += quarterNum + " quarters ";
+        }
+        if (dimeNum > 0){
+            toReturn += dimeNum + " dimes ";
+        }
+        if (nickelNum > 0){
+            toReturn += nickelNum + " nickels ";
+        }
+        return toReturn;
+    }
 
 }
